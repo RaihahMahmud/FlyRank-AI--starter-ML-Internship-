@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Opportunity Scoring with Search Performance Signals — Raihan Mahmud</title>
+<meta name="description" content="A FlyRank ML Internship capstone on prioritizing content pages for human review using observed search-performance signals.">
+<style>
+:root{
+  --ink:#20252b;
+  --muted:#69727c;
+  --line:#d9dee3;
+  --paper:#fff;
+  --page:#e9ecef;
+  --soft:#f7f8f9;
+  --accent:#294d68;
+  --accent-light:#edf3f7;
+  --max:980px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--page);
+  color:var(--ink);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.78;
+}
+.page{
+  width:min(var(--max),calc(100% - 34px));
+  margin:45px auto;
+  background:var(--paper);
+  padding:72px 88px 64px;
+  box-shadow:0 2px 18px rgba(0,0,0,.07);
+}
+header{
+  text-align:center;
+  border-bottom:1px solid #222;
+  padding-bottom:30px;
+  margin-bottom:40px;
+}
+.kicker{
+  font:600 11px/1.5 Arial,Helvetica,sans-serif;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:20px;
+}
+h1{
+  max-width:820px;
+  margin:0 auto 17px;
+  font-size:43px;
+  line-height:1.12;
+  letter-spacing:-.02em;
+  font-weight:700;
+}
+.subtitle{
+  max-width:720px;
+  margin:0 auto 20px;
+  color:#555f68;
+  font-size:20px;
+  line-height:1.5;
+}
+.author{
+  font-size:20px;
+  font-weight:700;
+  margin-top:19px;
+}
+.affiliation{
+  color:#59636d;
+  font-size:15px;
+  margin-top:2px;
+}
+.profile-links{
+  margin-top:8px;
+  font:13px/1.5 Arial,Helvetica,sans-serif;
+  color:var(--muted);
+}
+.profile-links span{margin:0 5px}
+.profile-links a,
+a{
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid #afc0cc;
+}
+.profile-links a:hover,a:hover{border-bottom-color:var(--accent)}
+.meta{
+  margin-top:19px;
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:6px 23px;
+  color:#7a838b;
+  font:11px/1.5 Arial,Helvetica,sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.meta span{position:relative}
+.meta span+span:before{
+  content:"";
+  position:absolute;
+  width:3px;height:3px;border-radius:50%;
+  background:#aab1b7;
+  left:-13px;top:7px;
+}
+h2{
+  margin:47px 0 18px;
+  padding-bottom:8px;
+  border-bottom:1px solid #cfd5da;
+  font-size:26px;
+  line-height:1.25;
+  font-weight:700;
+}
+h3{
+  margin:28px 0 8px;
+  font-size:19px;
+  line-height:1.35;
+}
+p{margin:0 0 17px}
+.lead{
+  font-size:18.5px;
+  line-height:1.78;
+}
+.note{
+  margin:24px 0;
+  padding:17px 21px;
+  background:var(--accent-light);
+  border-left:3px solid var(--accent);
+}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:0;
+  margin:28px 0 31px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.stat{
+  padding:17px 13px;
+  text-align:center;
+  border-right:1px solid var(--line);
+}
+.stat:last-child{border-right:0}
+.stat strong{
+  display:block;
+  font:700 24px/1.15 Arial,Helvetica,sans-serif;
+  color:var(--accent);
+}
+.stat span{
+  display:block;
+  margin-top:6px;
+  color:#737c84;
+  font:10px/1.4 Arial,Helvetica,sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+}
+ul,ol{padding-left:25px}
+li{margin:7px 0}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin:23px 0 27px;
+  font-size:16px;
+}
+th{
+  border-top:1.5px solid #222;
+  border-bottom:1px solid #777;
+  padding:10px 9px;
+  text-align:left;
+  font:700 11px/1.4 Arial,Helvetica,sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+td{
+  border-bottom:1px solid var(--line);
+  padding:11px 9px;
+}
+th:not(:first-child),td:not(:first-child){text-align:right}
+tbody tr:last-child td{border-bottom:1.5px solid #222}
+.highlight{font-weight:700;color:var(--accent)}
+.queue{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  border-top:1px solid var(--line);
+  margin:23px 0 27px;
+}
+.queue div{
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+}
+.queue div:nth-child(odd){border-right:1px solid var(--line)}
+.queue b{font-family:Arial,Helvetica,sans-serif;font-size:14px}
+.small{color:var(--muted);font-size:14px}
+.code{
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  font-size:.86em;
+  background:#f0f2f4;
+  padding:2px 5px;
+  border-radius:2px;
+}
+footer{
+  margin-top:58px;
+  padding-top:22px;
+  border-top:1px solid #222;
+  color:#68727b;
+  font:12.5px/1.65 Arial,Helvetica,sans-serif;
+}
+@media(max-width:760px){
+  body{background:#fff;font-size:16px}
+  .page{width:100%;margin:0;padding:38px 23px 45px;box-shadow:none}
+  h1{font-size:34px}
+  .subtitle{font-size:18px}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:nth-child(2){border-right:0}
+  .queue{grid-template-columns:1fr}
+  .queue div:nth-child(odd){border-right:0}
+  .meta{gap:6px 17px}
+  .meta span+span:before{display:none}
+}
+@media print{
+  body{background:#fff}
+  .page{width:auto;margin:0;padding:30px;box-shadow:none}
+}
+</style>
+</head>
+
+<body>
+<main class="page">
+
+<header>
+  <div class="kicker">FlyRank · Machine Learning Internship · Capstone</div>
+  <h1>Content Opportunity Scoring with Search Performance Signals</h1>
+  <p class="subtitle">A practical ranking approach for deciding which content pages deserve human review first.</p>
+  <div class="author">Raihan Mahmud</div>
+  <div class="affiliation">Machine Learning Internship Capstone · FlyRank</div>
+  <div class="profile-links">
+    <a href="https://github.com/RaihahMahmud" target="_blank" rel="noopener">GitHub</a>
+    <span>·</span>
+    <span>Hugging Face: RaihanGG2026</span>
+  </div>
+  <div class="meta">
+    <span>March 2026 warehouse release</span>
+    <span>Content refresh / opportunity scoring</span>
+    <span>Decision-support analysis</span>
+  </div>
+</header>
+
+<section>
+<h2>Abstract</h2>
+<p class="lead">
+Content teams often have more pages to review than they have time to review them. This project asks whether observed search-performance signals can be used to prioritize those pages into a useful review queue. I aggregate the March 2026 FlyRank warehouse data at the client and content-page level and train a Logistic Regression model using impressions, CTR, and average search position. The model is evaluated on an 80/20 client-grouped split, with the click threshold and baseline thresholds learned from the training clients only. On the held-out clients, the model reaches 0.9993 precision, 0.9863 recall, and 0.9927 F1, compared with 0.0000 for all three metrics for the simple rule-based baseline. The result is useful as evidence that the model reproduces the observed click-volume target well, but it should be treated as a prioritization signal rather than evidence that refreshing a page will cause better future search performance.
+</p>
+</section>
+
+<section>
+<p class="small" style="margin-bottom:26px;">Research note — prepared as an independent analysis for the FlyRank Machine Learning Internship capstone.</p>
+<h2>1. Introduction</h2>
+<p>
+The decision behind this project is straightforward: <strong>if an editor has a large set of pages to review, which ones should be looked at first?</strong>
+</p>
+<p>
+A page can have substantial search visibility but weak CTR, or it can have a different combination of impressions, CTR, and position that makes it worth investigating. Rather than asking the model to make the editorial decision itself, I use it to create a ranked queue. A person can then inspect the pages at the top of that queue and decide what, if anything, should change.
+</p>
+<div class="note">
+<strong>Important framing:</strong> this is not a model of Google's ranking algorithm. It is also not a causal study of content refreshes. The model works with observed search-performance data and supports a human review decision.
+</div>
+</section>
+
+<section>
+<h2>2. Data</h2>
+<p>
+The analysis uses the <strong>March 2026 FlyRank internship warehouse release</strong>, specifically the <span class="code">fact_content_daily_performance</span> table.
+</p>
+
+<div class="stats">
+  <div class="stat"><strong>9.84M</strong><span>daily records</span></div>
+  <div class="stat"><strong>31</strong><span>reporting dates</span></div>
+  <div class="stat"><strong>55</strong><span>raw clients</span></div>
+  <div class="stat"><strong>176,738</strong><span>modeling records</span></div>
+</div>
+
+<p>
+The raw data contains 9,841,378 daily records across 31 reporting dates and 55 clients. For modeling, I aggregate the data to the <span class="code">client_hash_id</span> + <span class="code">content_hash_id</span> level. The resulting modeling dataset contains 176,738 content-page records across 47 clients.
+</p>
+
+<h3>Signals used</h3>
+<ul>
+  <li><span class="code">gsc_impressions</span> — observed search impressions</li>
+  <li><span class="code">ctr</span> — clicks divided by impressions</li>
+  <li><span class="code">gsc_avg_position</span> — observed average search position</li>
+</ul>
+
+<p>
+Rows missing impressions or clicks were excluded because CTR could not be calculated reliably. Records still missing a required model feature after aggregation were also excluded.
+</p>
+
+<p class="small">
+The public version contains no client names, domains, URLs, private search queries, credentials, or raw private exports. Identifiers remain pseudonymous.
+</p>
+</section>
+
+<section>
+<h2>3. Methodology</h2>
+
+<h3>Target</h3>
+<p>
+The target is intentionally simple: a page is labeled positive when its aggregated click volume is above the <strong>training-set median</strong>. This is a proxy for identifying pages with stronger observed click-volume patterns. It is not a direct label for whether a page should be refreshed.
+</p>
+
+<h3>Model</h3>
+<p>
+I use Logistic Regression with standardized features. The model produces a score for each held-out page, and pages are ordered from the highest score to the lowest score to form the review queue.
+</p>
+
+<h3>Baseline</h3>
+<p>
+The comparison point is a simple rule: flag a page when its impressions are at or above the training-set 75th percentile <em>and</em> its CTR is at or below the training-set 25th percentile.
+</p>
+
+<h3>Validation</h3>
+<p>
+The train/test split is grouped by <span class="code">client_hash_id</span>. Eighty percent of the grouped data is used for training and 20% is held out for testing. The split produced 138,310 training rows and 38,428 test rows across 37 and 10 clients respectively, with <strong>zero client overlap</strong>.
+</p>
+
+<h3>Leakage checks</h3>
+<ul>
+  <li>No future-window features are used.</li>
+  <li>The click threshold is calculated from training data only.</li>
+  <li>The baseline thresholds are calculated from training data only.</li>
+  <li>Test clients are completely separate from training clients.</li>
+</ul>
+</section>
+
+<section>
+<h2>4. Results</h2>
+<p>
+The model and baseline are evaluated on exactly the same held-out client test set.
+</p>
+
+<table>
+<thead>
+<tr><th>Method</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
+</thead>
+<tbody>
+<tr><td>Logistic Regression</td><td class="highlight">0.9993</td><td class="highlight">0.9863</td><td class="highlight">0.9927</td></tr>
+<tr><td>Rule-based baseline</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+</tbody>
+</table>
+
+<p>
+The Logistic Regression model identifies most positive cases under the observed click-volume target, while the baseline identifies none on this particular test split. That is a strong difference on this evaluation, but it should be interpreted narrowly: the model is reproducing the chosen target much better than this particular baseline. It does not establish that Logistic Regression is better than every possible rule-based method.
+</p>
+
+<div class="note">
+<strong>What I would not conclude:</strong> a high model score does not mean that a page will gain traffic after a refresh. The experiment does not contain a controlled before/after intervention, so that causal conclusion is not supported.
+</div>
+</section>
+
+<section>
+<h2>5. Ranked Review Queue</h2>
+<p>
+The model turns the held-out pages into a practical review queue. Each page receives a model score, a priority rank, and a simple reason code that gives the reviewer some context.
+</p>
+
+<div class="queue">
+  <div><b>CTR opportunity</b><br><span class="small">1,074 pages</span></div>
+  <div><b>High impressions</b><br><span class="small">11,492 pages</span></div>
+  <div><b>Low CTR</b><br><span class="small">19,727 pages</span></div>
+  <div><b>Monitor</b><br><span class="small">6,135 pages</span></div>
+</div>
+
+<p>
+That gives a total of <strong>38,428 ranked pages</strong> in the held-out review queue.
+</p>
+
+<h3>How an editor can use it</h3>
+<ol>
+  <li><strong>Start with the highest-ranked pages.</strong> These are the pages the model considers most consistent with the positive target.</li>
+  <li><strong>Look for CTR opportunities.</strong> For pages with strong impressions and relatively low CTR, inspect the title, snippet, search intent, and content match.</li>
+  <li><strong>Protect visibility.</strong> Pages with high impressions are worth reviewing because they already receive meaningful search exposure.</li>
+  <li><strong>Use human judgment.</strong> Check relevance, intent, recent changes, content quality, and data quality before making a change.</li>
+</ol>
+
+<p>
+The queue is therefore a starting point for editorial work, not an automatic publishing system.
+</p>
+</section>
+
+<section>
+<h2>6. Limitations</h2>
+<ul>
+  <li>The target is a click-volume proxy, not a direct measure of refresh opportunity.</li>
+  <li>The analysis uses historical observational data and does not prove that a refresh causes better future performance.</li>
+  <li>The held-out clients improve the validation design, but the evaluation is still based on historical data.</li>
+  <li>The baseline is only one simple rule and performed poorly on this particular split.</li>
+  <li>Only three search-performance features are used; content and engagement context could add useful information.</li>
+  <li>Model scores are used for ordering the queue and should not be read as calibrated probabilities.</li>
+</ul>
+</section>
+
+<section>
+<h2>7. Reproducibility</h2>
+<p>
+The complete capstone analysis is available in the project repository. The notebook contains the data preparation, grouped validation, model evaluation, ranked queue, and artifact checks used for this paper.
+</p>
+<p>
+<strong>Notebook:</strong>
+<a href="https://github.com/RaihahMahmud/FlyRank-AI--starter-ML-Internship-/blob/main/work/notebooks/capstone.ipynb" target="_blank" rel="noopener">work/notebooks/capstone.ipynb</a>
+</p>
+<p>
+<strong>Repository:</strong>
+<a href="https://github.com/RaihahMahmud/FlyRank-AI--starter-ML-Internship-" target="_blank" rel="noopener">FlyRank-AI--starter-ML-Internship-</a>
+</p>
+</section>
+
+<section>
+<h2>8. Acknowledgments</h2>
+<p>
+Built on the <a href="https://flyrank.com" target="_blank" rel="noopener">FlyRank ML Internship dataset</a> as part of the Machine Learning Internship capstone.
+</p>
+</section>
+
+<footer>
+  <strong>Bottom line:</strong> the model is useful for organizing a review queue around observed search-performance patterns. The final editorial decision stays with a human.
+  <br><br>
+  This page is a public-facing research artifact. It intentionally avoids client-specific information and causal claims that the underlying data cannot support.
+</footer>
+
+</main>
+</body>
+</html>
