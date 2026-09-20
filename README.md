@@ -114,3 +114,56 @@ build on — and the `skills/` folder here is the instruction library for your A
 ---
 
 *Track leads: Mirza Ašćerić (ML) · Hole (data engineering). Code under MIT (see `LICENSE`); data under `DATA_USE.md`.*
+
+
+
+
+
+
+
+
+
+
+
+
+
+# FlyRank Capstone — Build-in-Public Story
+
+## What I Built
+
+I built a content opportunity scoring system during my Machine Learning internship at FlyRank.
+
+The goal was to help content teams decide which pages may deserve review first. Instead of trying to predict Google's ranking algorithm, I treated the project as a decision-support problem: use historical search-performance signals to rank pages for human review.
+
+The model uses signals such as impressions, click-through rate (CTR), and average search position. I used a client-grouped train/test split so that pages from the same client were not simply appearing in both training and evaluation data.
+
+The final model was a Logistic Regression classifier evaluated on held-out client data.
+
+## A Real Win
+
+The final model achieved:
+
+| Metric    | Result |
+| --------- | -----: |
+| Precision | 0.9993 |
+| Recall    | 0.9863 |
+| F1 Score  | 0.9927 |
+
+This was a significant improvement over the simple rule-based baseline, which had 0.0000 for these evaluation metrics on the same held-out setup.
+
+The result showed that the selected search-performance signals contained enough information to separate the target groups very effectively on the held-out client data.
+
+## A Real Limitation
+
+The model's strong evaluation numbers do not mean that it can predict Google's algorithm or guarantee that refreshing a page will improve its future performance.
+
+The project is a prioritization tool. It identifies pages that may deserve human review based on historical data. A content specialist still needs to inspect the page and decide whether a refresh is actually appropriate.
+
+There are also limitations in the available data. The model is based on historical search and engagement signals, so changes in search behavior, content quality, competition, or other factors outside the model can affect what happens after a recommendation.
+
+## What I Learned
+
+The biggest lesson from this project was that the modeling approach is only one part of the work. Defining the target correctly, preventing leakage, choosing an evaluation split that reflects the real use case, and being honest about what the model can and cannot claim were just as important as training the model.
+
+This project also gave me practical experience taking a machine-learning idea from problem framing through evaluation and turning the result into something that could support a real workflow.
+
