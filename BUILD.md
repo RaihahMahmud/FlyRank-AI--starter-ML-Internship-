@@ -54,3 +54,44 @@ I want to document it using the same structure:
 The project would focus on building a practical business application rather than only demonstrating individual technologies. I also want to explore where machine learning or AI can provide useful functionality within the product.
 
 The goal is to keep building projects that demonstrate both software engineering and practical problem-solving.
+
+
+
+# Plan to Keep Building
+
+My next portfolio case study will be a B2B e-commerce platform focused on helping businesses manage products, customers, orders, and other parts of their online sales workflow.
+
+I want to build it as a real software project rather than just a UI demonstration.
+
+## Problem
+
+Small and growing businesses often need a system for managing their products, customers, orders, and sales operations without having to piece together multiple disconnected tools.
+
+The project will explore how a single platform could bring these workflows together in a practical way.
+
+## What I Will Do
+
+I plan to build the platform as a full-stack application, including:
+
+* Product and inventory management
+* Business/customer accounts
+* Shopping and ordering workflows
+* Order management
+* Authentication and authorization
+* Admin dashboard
+* Backend APIs
+* Database integration
+* Deployment and production infrastructure
+
+I also want to explore where AI or machine learning could provide useful functionality rather than adding AI simply for the sake of using it.
+
+## What I Hope to Get From It
+
+The main outcome will be a deployed, usable application that demonstrates my ability to work across the full software stack.
+
+I will document the project using the same structure as my current case studies:
+
+**Problem → What I did → What came of it**
+
+This will let me show not only the technologies I used, but also the decisions I made, the problems I encountered, and what the finished system actually achieved.
+
